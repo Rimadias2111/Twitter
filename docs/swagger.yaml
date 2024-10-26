@@ -1,0 +1,617 @@
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  models.GetAllTweetsResponse:
+    properties:
+      count:
+        type: integer
+      tweets:
+        items:
+          $ref: '#/definitions/models.Tweet'
+        type: array
+    type: object
+  models.GetAllUsersResponse:
+    properties:
+      count:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  models.ResponseError:
+    properties:
+      error_code:
+        type: string
+      error_message:
+        type: string
+    type: object
+  models.ResponseId:
+    properties:
+      id:
+        type: string
+    type: object
+  models.ResponseSuccess:
+    properties:
+      message:
+        type: string
+    type: object
+  models.Tweet:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: string
+      imagePath:
+        type: string
+      retweetID:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: string
+      videoPath:
+        type: string
+    type: object
+  models.User:
+    properties:
+      bio:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      profileImage:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/login:
+    post:
+      consumes:
+      - application/json
+      description: API for user login
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      summary: User login
+      tags:
+      - auth
+  /v1/tweets:
+    get:
+      description: API for retrieving all tweets with pagination and search
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of tweets per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: User ID for filtering tweets
+        in: query
+        name: user_id
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetAllTweetsResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all tweets
+      tags:
+      - tweet
+    post:
+      consumes:
+      - application/json
+      description: API for creating a new tweet
+      parameters:
+      - description: Tweet data
+        in: body
+        name: tweet
+        required: true
+        schema:
+          $ref: '#/definitions/models.Tweet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseId'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a tweet
+      tags:
+      - tweet
+  /v1/tweets/{id}:
+    get:
+      description: API for retrieving a tweet by ID
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: tweet_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tweet'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a tweet by ID
+      tags:
+      - tweet
+  /v1/tweets/{id}/like:
+    post:
+      description: API for liking a tweet
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Like a tweet
+      tags:
+      - tweet
+  /v1/tweets/{id}/unlike:
+    delete:
+      description: API for unliking a tweet
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Unlike a tweet
+      tags:
+      - tweet
+  /v1/tweets/{tweet_id}:
+    delete:
+      description: API for deleting a tweet
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a tweet
+      tags:
+      - tweet
+    put:
+      consumes:
+      - application/json
+      description: API for updating a tweet
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: tweet_id
+        required: true
+        type: string
+      - description: Tweet data
+        in: body
+        name: tweet
+        required: true
+        schema:
+          $ref: '#/definitions/models.Tweet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a tweet
+      tags:
+      - tweet
+  /v1/tweets/{tweet_id}/retweet:
+    post:
+      description: API for retweeting an existing tweet
+      parameters:
+      - description: Tweet ID to retweet
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseId'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Retweets a tweet
+      tags:
+      - tweet
+  /v1/tweets/feed:
+    get:
+      description: API for retrieving tweets from users that the current user is following
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of tweets per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetAllTweetsResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get tweets from followed users
+      tags:
+      - tweet
+  /v1/users:
+    get:
+      description: API for retrieving all users with pagination and search
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of users per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetAllUsersResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: API for creating a new user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseId'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a user
+      tags:
+      - user
+  /v1/users/{id}/follow:
+    post:
+      description: API for following a user
+      parameters:
+      - description: User ID to follow
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Follow a user
+      tags:
+      - user
+  /v1/users/{id}/unfollow:
+    delete:
+      description: API for unfollowing a user
+      parameters:
+      - description: User ID to unfollow
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Unfollow a user
+      tags:
+      - user
+  /v1/users/{user_id}:
+    delete:
+      description: API for deleting a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user
+      tags:
+      - user
+    get:
+      description: API for retrieving a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user by ID
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: API for updating a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user
+      tags:
+      - user
+swagger: "2.0"

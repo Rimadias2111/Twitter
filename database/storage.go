@@ -3,31 +3,37 @@ package database
 import (
 	"gorm.io/gorm"
 	"project/database/storage"
-	"project/models"
 )
 
 type IStore interface {
-	User() *User
+	User() User
+	Tweet() Tweet
+	Like() Like
+	Follow() Follow
 }
 
 type Store struct {
-	db   *gorm.DB
-	user User
+	db     *gorm.DB
+	user   User
+	tweet  Tweet
+	like   Like
+	follow Follow
 }
 
-type User interface {
-	CreateUser(user *models.User) (string, error)
+func New(db *gorm.DB) *Store {
+	return &Store{
+		db:     db,
+		user:   storage.NewUserRepo(db),
+		tweet:  storage.NewTweetRepo(db),
+		like:   storage.NewLikeRepo(db),
+		follow: storage.NewFollowRepo(db),
+	}
 }
 
-func New(db *gorm.DB) {
-	store := &Store{}
+func (s *Store) User() User { return s.user }
 
-	store.user = storage.NewUserRepo(db)
+func (s *Store) Tweet() Tweet { return s.tweet }
 
-}
+func (s *Store) Like() Like { return s.like }
 
-func (s *Store) User() *User { return &s.user }
-
-func test(s *Store) {
-
-}
+func (s *Store) Follow() Follow { return s.follow }
