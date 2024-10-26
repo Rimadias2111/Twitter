@@ -12,8 +12,10 @@ services:
       - redis
     environment:
       REDIS_URL: "redis://redis:6379"
-      DSN:  "postgres://makhmud:1@db/visitca?sslmode=disable"
-      TOKEN_TIME: "30"
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
 
   db:
     image: postgres:16

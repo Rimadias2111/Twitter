@@ -3,7 +3,6 @@ package storage
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"project/database"
 	"project/models"
 )
 
@@ -11,7 +10,7 @@ type TweetRepo struct {
 	db *gorm.DB
 }
 
-func NewTweetRepo(db *gorm.DB) database.Tweet {
+func NewTweetRepo(db *gorm.DB) Tweet {
 	return &TweetRepo{
 		db: db,
 	}

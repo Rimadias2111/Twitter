@@ -3,7 +3,6 @@ package storage
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"project/database"
 	"project/models"
 )
 
@@ -11,7 +10,7 @@ type LikeRepo struct {
 	db *gorm.DB
 }
 
-func NewLikeRepo(db *gorm.DB) database.Like {
+func NewLikeRepo(db *gorm.DB) Like {
 	return &LikeRepo{
 		db: db,
 	}

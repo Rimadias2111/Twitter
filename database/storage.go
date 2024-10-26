@@ -6,18 +6,18 @@ import (
 )
 
 type IStore interface {
-	User() User
-	Tweet() Tweet
-	Like() Like
-	Follow() Follow
+	User() storage.User
+	Tweet() storage.Tweet
+	Like() storage.Like
+	Follow() storage.Follow
 }
 
 type Store struct {
 	db     *gorm.DB
-	user   User
-	tweet  Tweet
-	like   Like
-	follow Follow
+	user   storage.User
+	tweet  storage.Tweet
+	like   storage.Like
+	follow storage.Follow
 }
 
 func New(db *gorm.DB) *Store {
@@ -30,10 +30,10 @@ func New(db *gorm.DB) *Store {
 	}
 }
 
-func (s *Store) User() User { return s.user }
+func (s *Store) User() storage.User { return s.user }
 
-func (s *Store) Tweet() Tweet { return s.tweet }
+func (s *Store) Tweet() storage.Tweet { return s.tweet }
 
-func (s *Store) Like() Like { return s.like }
+func (s *Store) Like() storage.Like { return s.like }
 
-func (s *Store) Follow() Follow { return s.follow }
+func (s *Store) Follow() storage.Follow { return s.follow }

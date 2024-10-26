@@ -3,7 +3,6 @@ package storage
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"project/database"
 	"project/models"
 )
 
@@ -11,7 +10,7 @@ type UserRepo struct {
 	db *gorm.DB
 }
 
-func NewUserRepo(db *gorm.DB) database.User {
+func NewUserRepo(db *gorm.DB) User {
 	return &UserRepo{db: db}
 }
 

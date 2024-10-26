@@ -3,7 +3,6 @@ package storage
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"project/database"
 	"project/models"
 )
 
@@ -11,7 +10,7 @@ type FollowRepo struct {
 	db *gorm.DB
 }
 
-func NewFollowRepo(db *gorm.DB) database.Follow {
+func NewFollowRepo(db *gorm.DB) Follow {
 	return &FollowRepo{db: db}
 }
 
