@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"project/etc"
-	"project/etc/jwt"
+	auth "project/etc/jwt"
 	"project/models"
 )
 
@@ -55,7 +55,7 @@ func (h *Controller) LoginUser(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.GenerateToken(user.Id.String(), user.Username)
+	token, err := auth.GenerateToken(user.Id.String(), user.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while generating token: " + err.Error(),
