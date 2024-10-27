@@ -106,7 +106,8 @@ func (h *Controller) UpdateUser(c *gin.Context) {
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) DeleteUser(c *gin.Context) {
-	id := c.Param("user_id")
+	idStr := c.Param("user_id")
+	id := uuid.MustParse(idStr)
 
 	err := h.store.User().Delete(models.RequestId{Id: id})
 	if err != nil {
@@ -132,7 +133,8 @@ func (h *Controller) DeleteUser(c *gin.Context) {
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) GetUser(c *gin.Context) {
-	id := c.Param("user_id")
+	idStr := c.Param("user_id")
+	id := uuid.MustParse(idStr)
 
 	user, err := h.store.User().Get(models.RequestId{Id: id})
 	if err != nil {

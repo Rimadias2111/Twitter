@@ -8,7 +8,7 @@ import (
 )
 
 // @Security ApiKeyAuth
-// @Router /v1/tweets/{id}/like [post]
+// @Router /v1/tweets/{tweet_id}/like [post]
 // @Summary Like a tweet
 // @Description API for liking a tweet
 // @Tags tweet
@@ -17,9 +17,8 @@ import (
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) LikeTweet(c *gin.Context) {
-	tweetID := c.Param("id")
+	tweetID := c.Param("tweet_id")
 
-	// Парсинг tweetID в UUID
 	parsedTweetID, err := uuid.Parse(tweetID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
@@ -29,8 +28,7 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 		return
 	}
 
-	// Получение userID из токена
-	userID, exists := c.Get("userID")
+	userIdStr, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ResponseError{
 			ErrorMessage: "User ID not found in context",
@@ -39,9 +37,11 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 		return
 	}
 
+	userID, err := uuid.Parse(userIdStr.(string))
+
 	like := models.Like{
 		ID:      uuid.New(),
-		UserID:  userID.(uuid.UUID),
+		UserID:  userID,
 		TweetID: parsedTweetID,
 	}
 
@@ -59,7 +59,7 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/tweets/{id}/unlike [delete]
+// @Router /v1/tweets/{tweer_id}/unlike [delete]
 // @Summary Unlike a tweet
 // @Description API for unliking a tweet
 // @Tags tweet
@@ -68,9 +68,8 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) UnlikeTweet(c *gin.Context) {
-	tweetID := c.Param("id")
+	tweetID := c.Param("tweet_id")
 
-	// Парсинг tweetID в UUID
 	parsedTweetID, err := uuid.Parse(tweetID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
@@ -80,8 +79,7 @@ func (h *Controller) UnlikeTweet(c *gin.Context) {
 		return
 	}
 
-	// Получение userID из токена
-	userID, exists := c.Get("userID")
+	userIdStr, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ResponseError{
 			ErrorMessage: "User ID not found in context",
@@ -90,7 +88,9 @@ func (h *Controller) UnlikeTweet(c *gin.Context) {
 		return
 	}
 
-	if err := h.store.Like().Delete(userID.(uuid.UUID), parsedTweetID); err != nil {
+	userID, err := uuid.Parse(userIdStr.(string))
+
+	if err := h.store.Like().Delete(userID, parsedTweetID); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while unliking the tweet: " + err.Error(),
 			ErrorCode:    "Internal Server Error",

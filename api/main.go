@@ -5,6 +5,8 @@ import (
 	"github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"project/api/controllers"
+	"project/api/middleware"
+	_ "project/docs" //for swagger
 )
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -22,19 +24,27 @@ func Construct(cont controllers.Controller) *gin.Engine {
 
 	api := r.Group("/v1")
 	{
+		//login
+		api.POST("login", cont.LoginUser)
+
 		//user endpoints
 		api.POST("/users", cont.CreateUser)
-		api.PUT("/users/:user_id", cont.UpdateUser)
-		api.DELETE("/users/:user_id", cont.DeleteUser)
+		api.PUT("/users/:user_id", middleware.AuthMiddleware(), cont.UpdateUser)
+		api.DELETE("/users/:user_id", middleware.AuthMiddleware(), cont.DeleteUser)
 		api.GET("/users/:user_id", cont.GetUser)
 		api.GET("/users", cont.GetAllUsers)
+		api.POST("/users/:user_id/follow", middleware.AuthMiddleware(), cont.FollowUser)
+		api.DELETE("/users/:user_id/unfollow", middleware.AuthMiddleware(), cont.UnfollowUser)
 
 		//tweet endpoints
-		api.POST("/tweets", cont.CreateTweet)
-		api.PUT("/tweets/:tweet_id", cont.UpdateTweet)
-		api.DELETE("/tweets/:tweet_id", cont.DeleteTweet)
+		api.POST("/tweets", middleware.AuthMiddleware(), cont.CreateTweet)
+		api.PUT("/tweets/:tweet_id", middleware.AuthMiddleware(), cont.UpdateTweet)
+		api.DELETE("/tweets/:tweet_id", middleware.AuthMiddleware(), cont.DeleteTweet)
 		api.GET("/tweets/:tweet_id", cont.GetTweet)
 		api.GET("/tweets", cont.GetAllTweets)
+		api.POST("/tweets/:tweet_id/like", middleware.AuthMiddleware(), cont.LikeTweet)
+		api.DELETE("/tweets/:tweet_id/unlike", middleware.AuthMiddleware(), cont.UnlikeTweet)
+		api.POST("/tweets/:tweet_id/retweet", middleware.AuthMiddleware(), cont.Retweet)
 	}
 
 	url := ginSwagger.URL("swagger/doc.json")

@@ -19,7 +19,9 @@ import (
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) CreateTweet(c *gin.Context) {
-	var tweet models.Tweet
+	var (
+		tweet models.Tweet
+	)
 	if err := c.ShouldBindJSON(&tweet); err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Error while binding JSON: " + err.Error(),
@@ -27,6 +29,26 @@ func (h *Controller) CreateTweet(c *gin.Context) {
 		})
 		return
 	}
+
+	userIdStr, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.ResponseError{
+			ErrorMessage: "User ID is not provided",
+			ErrorCode:    "Unauthorized",
+		})
+		return
+	}
+
+	userId, err := uuid.Parse(userIdStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ResponseError{
+			ErrorMessage: "Invalid user ID format: " + err.Error(),
+			ErrorCode:    "Bad Request",
+		})
+		return
+	}
+
+	tweet.UserID = userId
 
 	id, err := h.store.Tweet().Create(&tweet)
 	if err != nil {
@@ -97,7 +119,8 @@ func (h *Controller) UpdateTweet(c *gin.Context) {
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) DeleteTweet(c *gin.Context) {
-	id := c.Param("tweet_id")
+	idStr := c.Param("tweet_id")
+	id := uuid.MustParse(idStr)
 
 	err := h.store.Tweet().Delete(models.RequestId{Id: id})
 	if err != nil {
@@ -114,7 +137,7 @@ func (h *Controller) DeleteTweet(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/tweets/{id} [get]
+// @Router /v1/tweets/{tweet_id} [get]
 // @Summary Get a tweet by ID
 // @Description API for retrieving a tweet by ID
 // @Tags tweet
@@ -123,9 +146,8 @@ func (h *Controller) DeleteTweet(c *gin.Context) {
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) GetTweet(c *gin.Context) {
-	id := c.Param("tweet_id")
-
-	_, err := uuid.Parse(id)
+	idStr := c.Param("tweet_id")
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Invalid UUID format: " + err.Error(),
@@ -234,7 +256,7 @@ func (h *Controller) GetTweetsFeed(c *gin.Context) {
 		Page:  page,
 	}
 
-	userID, exists := c.Get("userID")
+	userIdStr, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ResponseError{
 			ErrorMessage: "User ID not found in context",
@@ -243,7 +265,9 @@ func (h *Controller) GetTweetsFeed(c *gin.Context) {
 		return
 	}
 
-	tweets, err := h.store.Tweet().GetTweetsForUser(userID.(uuid.UUID), req)
+	userID, err := uuid.Parse(userIdStr.(string))
+
+	tweets, err := h.store.Tweet().GetTweetsForUser(userID, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while retrieving tweets feed: " + err.Error(),
@@ -276,7 +300,7 @@ func (h *Controller) Retweet(c *gin.Context) {
 		return
 	}
 
-	userID, exists := c.Get("userID")
+	userIsStr, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ResponseError{
 			ErrorMessage: "User ID not found in context",
@@ -285,9 +309,17 @@ func (h *Controller) Retweet(c *gin.Context) {
 		return
 	}
 
+	userID, err := uuid.Parse(userIsStr.(string))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, models.ResponseError{
+			ErrorMessage: "User ID not found in context",
+			ErrorCode:    "Unauthorized",
+		})
+		return
+	}
+
 	newTweet := models.Tweet{
-		Id:        uuid.New(),
-		UserID:    userID.(uuid.UUID),
+		UserID:    userID,
 		RetweetID: &originalTweetID,
 	}
 

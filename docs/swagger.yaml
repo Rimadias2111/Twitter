@@ -205,61 +205,7 @@ paths:
       summary: Create a tweet
       tags:
       - tweet
-  /v1/tweets/{id}:
-    get:
-      description: API for retrieving a tweet by ID
-      parameters:
-      - description: Tweet ID
-        in: path
-        name: tweet_id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Tweet'
-        "400":
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-      security:
-      - ApiKeyAuth: []
-      summary: Get a tweet by ID
-      tags:
-      - tweet
-  /v1/tweets/{id}/like:
-    post:
-      description: API for liking a tweet
-      parameters:
-      - description: Tweet ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseSuccess'
-        "400":
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-      security:
-      - ApiKeyAuth: []
-      summary: Like a tweet
-      tags:
-      - tweet
-  /v1/tweets/{id}/unlike:
+  /v1/tweets/{tweer_id}/unlike:
     delete:
       description: API for unliking a tweet
       parameters:
@@ -313,6 +259,32 @@ paths:
       summary: Delete a tweet
       tags:
       - tweet
+    get:
+      description: API for retrieving a tweet by ID
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: tweet_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tweet'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a tweet by ID
+      tags:
+      - tweet
     put:
       consumes:
       - application/json
@@ -347,6 +319,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update a tweet
+      tags:
+      - tweet
+  /v1/tweets/{tweet_id}/like:
+    post:
+      description: API for liking a tweet
+      parameters:
+      - description: Tweet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Like a tweet
       tags:
       - tweet
   /v1/tweets/{tweet_id}/retweet:
@@ -471,60 +470,6 @@ paths:
       summary: Create a user
       tags:
       - user
-  /v1/users/{id}/follow:
-    post:
-      description: API for following a user
-      parameters:
-      - description: User ID to follow
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseSuccess'
-        "400":
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-      security:
-      - ApiKeyAuth: []
-      summary: Follow a user
-      tags:
-      - user
-  /v1/users/{id}/unfollow:
-    delete:
-      description: API for unfollowing a user
-      parameters:
-      - description: User ID to unfollow
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseSuccess'
-        "400":
-          description: Invalid input
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.ResponseError'
-      security:
-      - ApiKeyAuth: []
-      summary: Unfollow a user
-      tags:
-      - user
   /v1/users/{user_id}:
     delete:
       description: API for deleting a user
@@ -614,4 +559,63 @@ paths:
       summary: Update a user
       tags:
       - user
+  /v1/users/{user_id}/follow:
+    post:
+      description: API for following a user
+      parameters:
+      - description: User ID to follow
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Follow a user
+      tags:
+      - user
+  /v1/users/{user_id}/unfollow:
+    delete:
+      description: API for unfollowing a user
+      parameters:
+      - description: User ID to unfollow
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseSuccess'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ResponseError'
+      security:
+      - ApiKeyAuth: []
+      summary: Unfollow a user
+      tags:
+      - user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

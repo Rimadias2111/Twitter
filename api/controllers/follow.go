@@ -8,7 +8,7 @@ import (
 )
 
 // @Security ApiKeyAuth
-// @Router /v1/users/{id}/follow [post]
+// @Router /v1/users/{user_id}/follow [post]
 // @Summary Follow a user
 // @Description API for following a user
 // @Tags user
@@ -17,7 +17,7 @@ import (
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) FollowUser(c *gin.Context) {
-	followedID := c.Param("id")
+	followedID := c.Param("user_id")
 
 	parsedFollowedID, err := uuid.Parse(followedID)
 	if err != nil {
@@ -28,7 +28,7 @@ func (h *Controller) FollowUser(c *gin.Context) {
 		return
 	}
 
-	followerID, exists := c.Get("userID")
+	followerIdStr, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ResponseError{
 			ErrorMessage: "User ID not found in context",
@@ -37,7 +37,9 @@ func (h *Controller) FollowUser(c *gin.Context) {
 		return
 	}
 
-	isFollowing, err := h.store.Follow().IsFollowing(followerID.(uuid.UUID), parsedFollowedID)
+	followerID, err := uuid.Parse(followerIdStr.(string))
+
+	isFollowing, err := h.store.Follow().IsFollowing(followerID, parsedFollowedID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while checking follow status: " + err.Error(),
@@ -56,7 +58,7 @@ func (h *Controller) FollowUser(c *gin.Context) {
 
 	follow := models.Follow{
 		ID:         uuid.New(),
-		FollowerID: followerID.(uuid.UUID),
+		FollowerID: followerID,
 		FollowedID: parsedFollowedID,
 	}
 
@@ -74,7 +76,7 @@ func (h *Controller) FollowUser(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/users/{id}/unfollow [delete]
+// @Router /v1/users/{user_id}/unfollow [delete]
 // @Summary Unfollow a user
 // @Description API for unfollowing a user
 // @Tags user
@@ -83,7 +85,7 @@ func (h *Controller) FollowUser(c *gin.Context) {
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) UnfollowUser(c *gin.Context) {
-	followedID := c.Param("id")
+	followedID := c.Param("user_id")
 
 	parsedFollowedID, err := uuid.Parse(followedID)
 	if err != nil {
@@ -94,7 +96,7 @@ func (h *Controller) UnfollowUser(c *gin.Context) {
 		return
 	}
 
-	followerID, exists := c.Get("userID")
+	followerIdStr, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ResponseError{
 			ErrorMessage: "User ID not found in context",
@@ -103,7 +105,9 @@ func (h *Controller) UnfollowUser(c *gin.Context) {
 		return
 	}
 
-	if err := h.store.Follow().Delete(followerID.(uuid.UUID), parsedFollowedID); err != nil {
+	followerID, err := uuid.Parse(followerIdStr.(string))
+
+	if err := h.store.Follow().Delete(followerID, parsedFollowedID); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while unfollowing the user: " + err.Error(),
 			ErrorCode:    "Internal Server Error",

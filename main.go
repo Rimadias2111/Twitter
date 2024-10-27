@@ -16,8 +16,7 @@ import (
 
 func setupDatabase() (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable",
-		os.Getenv("DB_HOST"),
+		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
@@ -47,6 +46,9 @@ func setupDatabase() (*gorm.DB, error) {
 	return db, nil
 }
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	godotenv.Load(".env")
 	db, err := setupDatabase()
