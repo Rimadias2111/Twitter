@@ -74,17 +74,17 @@ func (r *TweetRepo) GetAll(req models.GetAllTweetsRequest) (*models.GetAllTweets
 	return &resp, nil
 }
 
-func (r *TweetRepo) GetTweetsForUser(userID uuid.UUID, req models.GetAllTweetsRequest) (*models.GetAllTweetsResponse, error) {
+func (r *TweetRepo) GetTweetsForUser(Id models.RequestId, req models.GetAllTweetsRequest) (*models.GetAllTweetsResponse, error) {
 	var (
 		resp   models.GetAllTweetsResponse
 		offset = int((req.Page - 1) * req.Limit)
 	)
 
-	subQuery := r.db.Model(&models.Follow{}).Select("followed_id").Where("follower_id = ?", userID)
+	subQuery := r.db.Model(&models.Follow{}).Select("followed_id").Where("follower_id = ?", Id.Id)
 
 	query := r.db.Model(&models.Tweet{}).
 		Where("user_id IN (?)", subQuery).
-		Or("user_id = ?", userID).
+		Or("user_id = ?", Id.Id).
 		Offset(offset).
 		Limit(int(req.Limit)).
 		Order("created_at DESC")

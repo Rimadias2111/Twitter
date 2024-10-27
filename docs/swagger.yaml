@@ -1,12 +1,4 @@
 definitions:
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
   models.GetAllTweetsResponse:
     properties:
       count:
@@ -58,46 +50,8 @@ definitions:
         type: string
     type: object
   models.Tweet:
-    properties:
-      content:
-        type: string
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: string
-      imagePath:
-        type: string
-      retweetID:
-        type: string
-      updatedAt:
-        type: string
-      userID:
-        type: string
-      videoPath:
-        type: string
     type: object
   models.User:
-    properties:
-      bio:
-        type: string
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      profileImage:
-        type: string
-      updatedAt:
-        type: string
-      username:
-        type: string
     type: object
 info:
   contact: {}
@@ -327,7 +281,7 @@ paths:
       parameters:
       - description: Tweet ID
         in: path
-        name: id
+        name: tweet_id
         required: true
         type: string
       responses:
@@ -354,7 +308,7 @@ paths:
       parameters:
       - description: Tweet ID to retweet
         in: path
-        name: id
+        name: tweet_id
         required: true
         type: string
       responses:

@@ -42,6 +42,7 @@ func Construct(cont controllers.Controller) *gin.Engine {
 		api.DELETE("/tweets/:tweet_id", middleware.AuthMiddleware(), cont.DeleteTweet)
 		api.GET("/tweets/:tweet_id", cont.GetTweet)
 		api.GET("/tweets", cont.GetAllTweets)
+		api.GET("/tweets/feed", middleware.AuthMiddleware(), cont.GetTweetsFeed)
 		api.POST("/tweets/:tweet_id/like", middleware.AuthMiddleware(), cont.LikeTweet)
 		api.DELETE("/tweets/:tweet_id/unlike", middleware.AuthMiddleware(), cont.UnlikeTweet)
 		api.POST("/tweets/:tweet_id/retweet", middleware.AuthMiddleware(), cont.Retweet)

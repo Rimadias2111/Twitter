@@ -82,6 +82,16 @@ func (h *Controller) UpdateUser(c *gin.Context) {
 		return
 	}
 
+	hashPassword, err := etc.GeneratePasswordHash(user.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ResponseError{
+			ErrorMessage: "Error while hashing password" + err.Error(),
+			ErrorCode:    "Bad Request",
+		})
+		return
+	}
+	user.Password = string(hashPassword)
+
 	user.Id = id
 	if err := h.store.User().Update(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{

@@ -423,7 +423,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Tweet ID",
-                        "name": "id",
+                        "name": "tweet_id",
                         "in": "path",
                         "required": true
                     }
@@ -466,7 +466,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Tweet ID to retweet",
-                        "name": "id",
+                        "name": "tweet_id",
                         "in": "path",
                         "required": true
                     }
@@ -824,18 +824,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "gorm.DeletedAt": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
-                }
-            }
-        },
         "models.GetAllTweetsResponse": {
             "type": "object",
             "properties": {
@@ -915,68 +903,10 @@ const docTemplate = `{
             }
         },
         "models.Tweet": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "imagePath": {
-                    "type": "string"
-                },
-                "retweetID": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "userID": {
-                    "type": "string"
-                },
-                "videoPath": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "models.User": {
-            "type": "object",
-            "properties": {
-                "bio": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "profileImage": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         }
     },
     "securityDefinitions": {

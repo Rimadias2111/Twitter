@@ -12,7 +12,7 @@ import (
 // @Summary Like a tweet
 // @Description API for liking a tweet
 // @Tags tweet
-// @Param id path string true "Tweet ID"
+// @Param tweet_id path string true "Tweet ID"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"

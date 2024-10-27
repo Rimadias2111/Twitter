@@ -20,7 +20,7 @@ type Tweet interface {
 	Delete(req models.RequestId) error
 	Get(req models.RequestId) (*models.Tweet, error)
 	GetAll(req models.GetAllTweetsRequest) (*models.GetAllTweetsResponse, error)
-	GetTweetsForUser(userID uuid.UUID, req models.GetAllTweetsRequest) (*models.GetAllTweetsResponse, error)
+	GetTweetsForUser(Id models.RequestId, req models.GetAllTweetsRequest) (*models.GetAllTweetsResponse, error)
 }
 
 type Like interface {
