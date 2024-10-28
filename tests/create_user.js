@@ -20,7 +20,7 @@ export default function () {
         },
     };
 
-    let response = http.post('http://localhost:8000/v1/users', payload, params);
+    let response = http.post('http://localhost:8080/v1/users', payload, params);
 
     check(response, {
         'is status 200': (r) => r.status === 200,

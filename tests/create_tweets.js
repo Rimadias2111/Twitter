@@ -8,18 +8,17 @@ export let options = {
 
 export default function () {
     let payload = JSON.stringify({
-        user_id: '123e4567-e89b-12d3-a456-426614174000',
         content: 'This is a test tweet',
     });
 
     let params = {
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNDAxYTBlYTUtYmYzYS00M2NmLWI5OTItZTYwOWI0ZDc2ZTA4Iiwicm9sZSI6InVzZXIiLCJleHAiOjE3MzAyMjUyMTd9.XGNAozk8BJlAQh14dyqV4uSw_nPZ1KK3665YINp1HbI',
         },
     };
 
-    let response = http.post('http://localhost:8000/v1/tweets', payload, params);
+    let response = http.post('http://localhost:8080/v1/tweets', payload, params);
 
     check(response, {
         'is status 200': (r) => r.status === 200,
