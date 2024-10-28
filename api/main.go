@@ -29,12 +29,12 @@ func Construct(cont controllers.Controller) *gin.Engine {
 
 		//user endpoints
 		api.POST("/users", cont.CreateUser)
-		api.PUT("/users/:user_id", middleware.AuthMiddleware(), cont.UpdateUser)
+		api.PUT("/users", middleware.AuthMiddleware(), cont.UpdateUser)
 		api.DELETE("/users/:user_id", middleware.AuthMiddleware(), cont.DeleteUser)
 		api.GET("/users/:user_id", cont.GetUser)
 		api.GET("/users", cont.GetAllUsers)
-		api.POST("/users/:user_id/follow", middleware.AuthMiddleware(), cont.FollowUser)
-		api.DELETE("/users/:user_id/unfollow", middleware.AuthMiddleware(), cont.UnfollowUser)
+		api.POST("/users/follow/:user_id", middleware.AuthMiddleware(), cont.FollowUser)
+		api.DELETE("/users/unfollow/:user_id", middleware.AuthMiddleware(), cont.UnfollowUser)
 
 		//tweet endpoints
 		api.POST("/tweets", middleware.AuthMiddleware(), cont.CreateTweet)
@@ -43,9 +43,9 @@ func Construct(cont controllers.Controller) *gin.Engine {
 		api.GET("/tweets/:tweet_id", cont.GetTweet)
 		api.GET("/tweets", cont.GetAllTweets)
 		api.GET("/tweets/feed", middleware.AuthMiddleware(), cont.GetTweetsFeed)
-		api.POST("/tweets/:tweet_id/like", middleware.AuthMiddleware(), cont.LikeTweet)
-		api.DELETE("/tweets/:tweet_id/unlike", middleware.AuthMiddleware(), cont.UnlikeTweet)
-		api.POST("/tweets/:tweet_id/retweet", middleware.AuthMiddleware(), cont.Retweet)
+		api.POST("/tweets/like/:tweet_id", middleware.AuthMiddleware(), cont.LikeTweet)
+		api.DELETE("/tweets/unlike/:tweet_id", middleware.AuthMiddleware(), cont.UnlikeTweet)
+		api.POST("/tweets/retweet/:tweet_id", middleware.AuthMiddleware(), cont.Retweet)
 	}
 
 	url := ginSwagger.URL("swagger/doc.json")

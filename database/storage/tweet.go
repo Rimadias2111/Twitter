@@ -27,7 +27,7 @@ func (r *TweetRepo) Create(tweet *models.Tweet) (string, error) {
 }
 
 func (r *TweetRepo) Update(tweet *models.Tweet) error {
-	if err := r.db.Save(tweet).Error; err != nil {
+	if err := r.db.Omit("UserID").Save(tweet).Error; err != nil {
 		return err
 	}
 	return nil

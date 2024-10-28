@@ -8,7 +8,7 @@ import (
 )
 
 // @Security ApiKeyAuth
-// @Router /v1/tweets/{tweet_id}/like [post]
+// @Router /v1/tweets/like/{tweet_id} [post]
 // @Summary Like a tweet
 // @Description API for liking a tweet
 // @Tags tweet
@@ -22,7 +22,7 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 	parsedTweetID, err := uuid.Parse(tweetID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
-			ErrorMessage: "Invalid UUID format: " + err.Error(),
+			ErrorMessage: "Invalid UUID format of tweet: " + err.Error(),
 			ErrorCode:    "Bad Request",
 		})
 		return
@@ -38,6 +38,13 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 	}
 
 	userID, err := uuid.Parse(userIdStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ResponseError{
+			ErrorMessage: "Invalid UUID format from token: " + err.Error(),
+			ErrorCode:    "Bad Request",
+		})
+		return
+	}
 
 	like := models.Like{
 		ID:      uuid.New(),
@@ -59,11 +66,11 @@ func (h *Controller) LikeTweet(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/tweets/{tweer_id}/unlike [delete]
+// @Router /v1/tweets/unlike/{tweet_id} [delete]
 // @Summary Unlike a tweet
 // @Description API for unliking a tweet
 // @Tags tweet
-// @Param id path string true "Tweet ID"
+// @Param tweet_id path string true "Tweet ID"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
@@ -73,7 +80,7 @@ func (h *Controller) UnlikeTweet(c *gin.Context) {
 	parsedTweetID, err := uuid.Parse(tweetID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
-			ErrorMessage: "Invalid UUID format: " + err.Error(),
+			ErrorMessage: "Invalid UUID format of tweet: " + err.Error(),
 			ErrorCode:    "Bad Request",
 		})
 		return
@@ -89,6 +96,13 @@ func (h *Controller) UnlikeTweet(c *gin.Context) {
 	}
 
 	userID, err := uuid.Parse(userIdStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ResponseError{
+			ErrorMessage: "Invalid UUID format from token: " + err.Error(),
+			ErrorCode:    "Bad Request",
+		})
+		return
+	}
 
 	if err := h.store.Like().Delete(userID, parsedTweetID); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{

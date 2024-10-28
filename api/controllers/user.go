@@ -15,13 +15,13 @@ import (
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user body models.User true "User data"
+// @Param user body models.CreateUser true "User data"
 // @Success 200 {object} models.ResponseId
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) CreateUser(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var userModel models.CreateUser
+	if err := c.ShouldBindJSON(&userModel); err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Error while binding JSON: " + err.Error(),
 			ErrorCode:    "Bad Request",
@@ -29,7 +29,7 @@ func (h *Controller) CreateUser(c *gin.Context) {
 		return
 	}
 
-	hashPassword, err := etc.GeneratePasswordHash(user.Password)
+	hashPassword, err := etc.GeneratePasswordHash(userModel.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Error while hashing password" + err.Error(),
@@ -37,7 +37,13 @@ func (h *Controller) CreateUser(c *gin.Context) {
 		})
 		return
 	}
-	user.Password = string(hashPassword)
+	user := models.User{
+		Name:         userModel.Name,
+		Bio:          userModel.Bio,
+		Username:     userModel.Username,
+		Password:     string(hashPassword),
+		ProfileImage: userModel.ProfileImage,
+	}
 
 	id, err := h.store.User().Create(&user)
 	if err != nil {
@@ -52,21 +58,38 @@ func (h *Controller) CreateUser(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/users/{user_id} [put]
+// @Router /v1/users [put]
 // @Summary Update a user
 // @Description API for updating a user
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user_id path string true "User ID"
-// @Param user body models.User true "User data"
+// @Param user body models.UpdateUser true "User data"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) UpdateUser(c *gin.Context) {
-	var user models.User
-	id, err := uuid.Parse(c.Param("user_id"))
+	var userModel models.UpdateUser
+	userIdStr, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.ResponseError{
+			ErrorMessage: "User ID is not provided",
+			ErrorCode:    "Unauthorized",
+		})
+		return
+	}
+
+	userId, err := uuid.Parse(userIdStr.(string))
+
 	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ResponseError{
+			ErrorMessage: "Invalid user ID format: " + err.Error(),
+			ErrorCode:    "Bad Request",
+		})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&userModel); err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Error while binding JSON: " + err.Error(),
 			ErrorCode:    "Bad Request",
@@ -74,25 +97,14 @@ func (h *Controller) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, models.ResponseError{
-			ErrorMessage: "Error while binding JSON: " + err.Error(),
-			ErrorCode:    "Bad Request",
-		})
-		return
+	user := models.User{
+		Id:           userId,
+		Name:         userModel.Name,
+		Bio:          userModel.Bio,
+		Username:     userModel.Username,
+		ProfileImage: userModel.ProfileImage,
 	}
 
-	hashPassword, err := etc.GeneratePasswordHash(user.Password)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ResponseError{
-			ErrorMessage: "Error while hashing password" + err.Error(),
-			ErrorCode:    "Bad Request",
-		})
-		return
-	}
-	user.Password = string(hashPassword)
-
-	user.Id = id
 	if err := h.store.User().Update(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while updating the user: " + err.Error(),
@@ -111,7 +123,7 @@ func (h *Controller) UpdateUser(c *gin.Context) {
 // @Summary Delete a user
 // @Description API for deleting a user
 // @Tags user
-// @Param id path string true "User ID"
+// @Param user_id path string true "User ID"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
@@ -166,6 +178,8 @@ func (h *Controller) GetUser(c *gin.Context) {
 // @Param page query int false "Page number"
 // @Param limit query int false "Number of users per page"
 // @Param search query string false "Search term"
+// @Param id_followers query string false "id to get followers"
+// @Param id_following query string false "id to get followings"
 // @Success 200 {object} models.GetAllUsersResponse
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
@@ -189,11 +203,17 @@ func (h *Controller) GetAllUsers(c *gin.Context) {
 	}
 
 	search := c.Query("search")
+	followersQuery := c.Query("id_followers")
+	followers, err := uuid.Parse(followersQuery) // Followers
+	followingQuery := c.Query("id_followings")
+	following, err := uuid.Parse(followingQuery) // Following
 
 	req := models.GetAllUsersRequest{
-		Page:   page,
-		Limit:  limit,
-		Search: search,
+		Page:      page,
+		Limit:     limit,
+		Search:    search,
+		Followers: followers,
+		Following: following,
 	}
 
 	users, err := h.store.User().GetAll(req)

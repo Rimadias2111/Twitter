@@ -8,11 +8,11 @@ import (
 )
 
 // @Security ApiKeyAuth
-// @Router /v1/users/{user_id}/follow [post]
+// @Router /v1/users/follow/{user_id} [post]
 // @Summary Follow a user
 // @Description API for following a user
 // @Tags user
-// @Param id path string true "User ID to follow"
+// @Param user_id path string true "User ID to follow"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
@@ -22,7 +22,7 @@ func (h *Controller) FollowUser(c *gin.Context) {
 	parsedFollowedID, err := uuid.Parse(followedID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
-			ErrorMessage: "Invalid UUID format: " + err.Error(),
+			ErrorMessage: "Invalid UUID format from path: " + err.Error(),
 			ErrorCode:    "Bad Request",
 		})
 		return
@@ -38,6 +38,12 @@ func (h *Controller) FollowUser(c *gin.Context) {
 	}
 
 	followerID, err := uuid.Parse(followerIdStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ResponseError{
+			ErrorMessage: "Invalid UUID format from token: " + err.Error(),
+			ErrorCode:    "Bad Request",
+		})
+	}
 
 	isFollowing, err := h.store.Follow().IsFollowing(followerID, parsedFollowedID)
 	if err != nil {
@@ -76,11 +82,11 @@ func (h *Controller) FollowUser(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/users/{user_id}/unfollow [delete]
+// @Router /v1/users/unfollow/{user_id} [delete]
 // @Summary Unfollow a user
 // @Description API for unfollowing a user
 // @Tags user
-// @Param id path string true "User ID to unfollow"
+// @Param user_id path string true "User ID to unfollow"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
@@ -90,7 +96,7 @@ func (h *Controller) UnfollowUser(c *gin.Context) {
 	parsedFollowedID, err := uuid.Parse(followedID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
-			ErrorMessage: "Invalid UUID format: " + err.Error(),
+			ErrorMessage: "Invalid UUID format from path: " + err.Error(),
 			ErrorCode:    "Bad Request",
 		})
 		return
@@ -106,6 +112,13 @@ func (h *Controller) UnfollowUser(c *gin.Context) {
 	}
 
 	followerID, err := uuid.Parse(followerIdStr.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ResponseError{
+			ErrorMessage: "Error uuid from token " + err.Error(),
+			ErrorCode:    "Internal Server Error",
+		})
+		return
+	}
 
 	if err := h.store.Follow().Delete(followerID, parsedFollowedID); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{

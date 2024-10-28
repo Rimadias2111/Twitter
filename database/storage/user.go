@@ -25,7 +25,7 @@ func (r *UserRepo) Create(user *models.User) (string, error) {
 }
 
 func (r *UserRepo) Update(user *models.User) error {
-	if err := r.db.Save(user).Error; err != nil {
+	if err := r.db.Omit("Password").Save(user).Error; err != nil {
 		return err
 	}
 
@@ -58,6 +58,14 @@ func (r *UserRepo) GetAll(req models.GetAllUsersRequest) (*models.GetAllUsersRes
 
 	if req.Search != "" {
 		query = query.Where("username ILIKE ?", "%"+req.Search+"%")
+	}
+
+	if req.Followers != uuid.Nil {
+		query.Joins("left join follows on follows.follower_id = users.id").
+			Where("follows.followed_id = ?", req.Followers)
+	} else if req.Following != uuid.Nil {
+		query.Joins("left join follows on follows.follower_id = users.id").
+			Where("follows.follower_id = ?", req.Following)
 	}
 
 	err := query.Offset(int(offset)).Limit(int(req.Limit)).Find(&resp.Users).Error

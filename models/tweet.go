@@ -29,3 +29,10 @@ type GetAllTweetsResponse struct {
 	Tweets []Tweet `json:"tweets"`
 	Count  int64   `json:"count"`
 }
+
+type CreateUpdateTweet struct {
+	Content   string     `json:"content"`
+	ImagePath *string    `json:"image_path"`
+	VideoPath *string    `json:"video_path"`
+	RetweetID *uuid.UUID `json:"retweet_id"`
+}

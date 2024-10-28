@@ -14,15 +14,15 @@ import (
 // @Tags tweet
 // @Accept json
 // @Produce json
-// @Param tweet body models.Tweet true "Tweet data"
+// @Param tweet body models.CreateUpdateTweet true "Tweet data"
 // @Success 200 {object} models.ResponseId
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) CreateTweet(c *gin.Context) {
 	var (
-		tweet models.Tweet
+		tweetModel models.CreateUpdateTweet
 	)
-	if err := c.ShouldBindJSON(&tweet); err != nil {
+	if err := c.ShouldBindJSON(&tweetModel); err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Error while binding JSON: " + err.Error(),
 			ErrorCode:    "Bad Request",
@@ -48,7 +48,13 @@ func (h *Controller) CreateTweet(c *gin.Context) {
 		return
 	}
 
-	tweet.UserID = userId
+	tweet := models.Tweet{
+		UserID:    userId,
+		Content:   tweetModel.Content,
+		RetweetID: tweetModel.RetweetID,
+		VideoPath: tweetModel.VideoPath,
+		ImagePath: tweetModel.ImagePath,
+	}
 
 	id, err := h.store.Tweet().Create(&tweet)
 	if err != nil {
@@ -70,12 +76,12 @@ func (h *Controller) CreateTweet(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param tweet_id path string true "Tweet ID"
-// @Param tweet body models.Tweet true "Tweet data"
+// @Param tweet body models.CreateUpdateTweet true "Tweet data"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
 func (h *Controller) UpdateTweet(c *gin.Context) {
-	var tweet models.Tweet
+	var tweetModel models.CreateUpdateTweet
 	id := c.Param("tweet_id")
 
 	parsedID, err := uuid.Parse(id)
@@ -87,7 +93,7 @@ func (h *Controller) UpdateTweet(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&tweet); err != nil {
+	if err := c.ShouldBindJSON(&tweetModel); err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Error while binding JSON: " + err.Error(),
 			ErrorCode:    "Bad Request",
@@ -95,7 +101,14 @@ func (h *Controller) UpdateTweet(c *gin.Context) {
 		return
 	}
 
-	tweet.Id = parsedID
+	tweet := models.Tweet{
+		Id:        parsedID,
+		Content:   tweetModel.Content,
+		RetweetID: tweetModel.RetweetID,
+		VideoPath: tweetModel.VideoPath,
+		ImagePath: tweetModel.ImagePath,
+	}
+
 	if err := h.store.Tweet().Update(&tweet); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ResponseError{
 			ErrorMessage: "Error while updating the tweet: " + err.Error(),
@@ -114,7 +127,7 @@ func (h *Controller) UpdateTweet(c *gin.Context) {
 // @Summary Delete a tweet
 // @Description API for deleting a tweet
 // @Tags tweet
-// @Param id path string true "Tweet ID"
+// @Param tweet_id path string true "Tweet ID"
 // @Success 200 {object} models.ResponseSuccess
 // @Failure 400 {object} models.ResponseError "Invalid input"
 // @Failure 500 {object} models.ResponseError "Internal server error"
@@ -265,16 +278,7 @@ func (h *Controller) GetTweetsFeed(c *gin.Context) {
 		return
 	}
 
-	userIdStrValue, ok := userIdStr.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, models.ResponseError{
-			ErrorMessage: "Invalid user ID format",
-			ErrorCode:    "Unauthorized",
-		})
-		return
-	}
-
-	userID, err := uuid.Parse(userIdStrValue)
+	userID, err := uuid.Parse(userIdStr.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Invalid user ID UUID format: " + err.Error(),
@@ -296,7 +300,7 @@ func (h *Controller) GetTweetsFeed(c *gin.Context) {
 }
 
 // @Security ApiKeyAuth
-// @Router /v1/tweets/{tweet_id}/retweet [post]
+// @Router /v1/tweets/retweet/{tweet_id} [post]
 // @Summary Retweets a tweet
 // @Description API for retweeting an existing tweet
 // @Tags tweet
@@ -325,16 +329,7 @@ func (h *Controller) Retweet(c *gin.Context) {
 		return
 	}
 
-	userIdStrValue, ok := userIdStr.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, models.ResponseError{
-			ErrorMessage: "Invalid user ID format",
-			ErrorCode:    "Unauthorized",
-		})
-		return
-	}
-
-	userID, err := uuid.Parse(userIdStrValue)
+	userID, err := uuid.Parse(userIdStr.(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ResponseError{
 			ErrorMessage: "Invalid user ID UUID format: " + err.Error(),
